@@ -1,6 +1,7 @@
 from functools import wraps
 import html
 import time
+import gradio as gr
 
 from modules import shared, progress, errors, devices, fifo_lock
 
@@ -20,6 +21,26 @@ def wrap_queued_call(func):
 def wrap_gradio_gpu_call(func, extra_outputs=None):
     @wraps(func)
     def f(*args, **kwargs):
+
+        request = {}
+        for item in args:
+            if type(item) == gr.Request:
+                request = item
+
+        with open('account.txt', 'r') as f:
+            accounts = f.readlines()
+
+        current_account = ""
+        for account in accounts:
+            if request.username in account:
+                current_account = account
+                break
+  
+        user_name, pass_word, expired_date, ip = current_account.rstrip().split(':')
+
+        if ip != request.client.host:
+            return
+        
 
         # if the first argument is a string that says "task(...)", it is treated as a job id
         if args and type(args[0]) == str and args[0].startswith("task(") and args[0].endswith(")"):
@@ -41,7 +62,7 @@ def wrap_gradio_gpu_call(func, extra_outputs=None):
             shared.state.end()
 
         return res
-
+    
     return wrap_gradio_call(f, extra_outputs=extra_outputs, add_stats=True)
 
 

@@ -57,22 +57,8 @@ def batch_txt2img(id_task: [str], prompt: [str], negative_prompt: [str], prompt_
     return list_images, list_infor, list_html_infor, list_html_comments
 
 def txt2img(id_task: str, prompt: str, negative_prompt: str, prompt_styles, steps: int, sampler_name: str, n_iter: int, batch_size: int, cfg_scale: float, height: int, width: int, enable_hr: bool, denoising_strength: float, hr_scale: float, hr_upscaler: str, hr_second_pass_steps: int, hr_resize_x: int, hr_resize_y: int, hr_checkpoint_name: str, hr_sampler_name: str, hr_prompt: str, hr_negative_prompt, override_settings_texts, request: gr.Request, *args):
-    with open('account.txt', 'r') as f:
-        accounts = f.readlines()
-
-    current_account = ""
-    for account in accounts:
-        if request.username in account:
-            current_account = account
-            break
-
     
-    user_name, pass_word, expired_date, ip = current_account.rstrip().split(':')
 
-    if ip != request.client.host:
-        return
-
-    print(f"requested IP address: {request.client.host}")
     override_settings = create_override_settings_dict(override_settings_texts)
     p = processing.StableDiffusionProcessingTxt2Img(
         sd_model=shared.sd_model,

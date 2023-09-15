@@ -252,7 +252,7 @@ class UiSettings:
             user_name, pass_word, expired_date, ip = original_string.rstrip().split(':')
             return f"{user_name}:{pass_word}:{expired_date}:{user_ip}\n"
         accounts = [assign_ip_to_user(item) if request.username in item else item for item in accounts]
-        print(f"accounts: {accounts}")
+        
         with open('account.txt', 'w') as file:
             file.writelines(accounts)
         return gr.update(value="Thành công")

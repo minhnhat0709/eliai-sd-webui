@@ -1252,7 +1252,7 @@ def create_ui():
         (img2img_interface, "img2img", "img2img"),
         (extras_interface, "Extras", "extras"),
         (pnginfo_interface, "PNG Info", "pnginfo"),
-        (modelmerger_ui.blocks, "Checkpoint Merger", "modelmerger"),
+        # (modelmerger_ui.blocks, "Checkpoint Merger", "modelmerger"),
         # (train_interface, "Train", "train"),
     ]
 
