@@ -105,11 +105,11 @@ class UiSettings:
         opts.reorder()
 
         with gr.Blocks(analytics_enabled=False) as settings_interface:
-            with gr.Row():
-                with gr.Column(scale=6):
-                    self.submit = gr.Button(value="Apply settings", variant='primary', elem_id="settings_submit")
-                with gr.Column():
-                    restart_gradio = gr.Button(value='Reload UI', variant='primary', elem_id="settings_restart_gradio")
+            # with gr.Row():
+            #     with gr.Column(scale=6):
+            #         self.submit = gr.Button(value="Apply settings", variant='primary', elem_id="settings_submit")
+            #     with gr.Column():
+            #         restart_gradio = gr.Button(value='Reload UI', variant='primary', elem_id="settings_restart_gradio")
 
             self.result = gr.HTML(elem_id="settings_result")
 
@@ -168,13 +168,13 @@ class UiSettings:
                         with gr.Column(scale=100):
                             pass
 
-                with gr.TabItem("Actions", id="actions", elem_id="settings_tab_actions"):
-                    request_notifications = gr.Button(value='Request browser notifications', elem_id="request_notifications")
-                    download_localization = gr.Button(value='Download localization template', elem_id="download_localization")
-                    reload_script_bodies = gr.Button(value='Reload custom script bodies (No ui updates, No restart)', variant='secondary', elem_id="settings_reload_script_bodies")
-                    with gr.Row():
-                        unload_sd_model = gr.Button(value='Unload SD checkpoint to free VRAM', elem_id="sett_unload_sd_model")
-                        reload_sd_model = gr.Button(value='Reload the last SD checkpoint back into VRAM', elem_id="sett_reload_sd_model")
+                # with gr.TabItem("Actions", id="actions", elem_id="settings_tab_actions"):
+                #     request_notifications = gr.Button(value='Request browser notifications', elem_id="request_notifications")
+                #     download_localization = gr.Button(value='Download localization template', elem_id="download_localization")
+                #     reload_script_bodies = gr.Button(value='Reload custom script bodies (No ui updates, No restart)', variant='secondary', elem_id="settings_reload_script_bodies")
+                #     with gr.Row():
+                #         unload_sd_model = gr.Button(value='Unload SD checkpoint to free VRAM', elem_id="sett_unload_sd_model")
+                #         reload_sd_model = gr.Button(value='Reload the last SD checkpoint back into VRAM', elem_id="sett_reload_sd_model")
 
                 with gr.TabItem("Licenses", id="licenses", elem_id="settings_tab_licenses"):
                     gr.HTML(shared.html("licenses.html"), elem_id="licenses")
@@ -183,48 +183,48 @@ class UiSettings:
 
                 self.text_settings = gr.Textbox(elem_id="settings_json", value=lambda: opts.dumpjson(), visible=False)
 
-            unload_sd_model.click(
-                fn=sd_models.unload_model_weights,
-                inputs=[],
-                outputs=[]
-            )
+            # unload_sd_model.click(
+            #     fn=sd_models.unload_model_weights,
+            #     inputs=[],
+            #     outputs=[]
+            # )
 
-            reload_sd_model.click(
-                fn=sd_models.reload_model_weights,
-                inputs=[],
-                outputs=[]
-            )
+            # reload_sd_model.click(
+            #     fn=sd_models.reload_model_weights,
+            #     inputs=[],
+            #     outputs=[]
+            # )
 
-            request_notifications.click(
-                fn=lambda: None,
-                inputs=[],
-                outputs=[],
-                _js='function(){}'
-            )
+            # request_notifications.click(
+            #     fn=lambda: None,
+            #     inputs=[],
+            #     outputs=[],
+            #     _js='function(){}'
+            # )
 
-            download_localization.click(
-                fn=lambda: None,
-                inputs=[],
-                outputs=[],
-                _js='download_localization'
-            )
+            # download_localization.click(
+            #     fn=lambda: None,
+            #     inputs=[],
+            #     outputs=[],
+            #     _js='download_localization'
+            # )
 
             def reload_scripts():
                 scripts.reload_script_body_only()
                 reload_javascript()  # need to refresh the html page
 
-            reload_script_bodies.click(
-                fn=reload_scripts,
-                inputs=[],
-                outputs=[]
-            )
+            # reload_script_bodies.click(
+            #     fn=reload_scripts,
+            #     inputs=[],
+            #     outputs=[]
+            # )
 
-            restart_gradio.click(
-                fn=shared.state.request_restart,
-                _js='restart_reload',
-                inputs=[],
-                outputs=[],
-            )
+            # restart_gradio.click(
+            #     fn=shared.state.request_restart,
+            #     _js='restart_reload',
+            #     inputs=[],
+            #     outputs=[],
+            # )
 
             def check_file(x):
                 if x is None:
@@ -243,18 +243,34 @@ class UiSettings:
 
         self.interface = settings_interface
 
+    def set_current_ip_fn(self, request: gr.Request):
+        with open('account.txt', 'r') as f:
+            accounts = f.readlines()
+        
+        user_ip = request.client.host
+        def assign_ip_to_user(original_string):
+            user_name, pass_word, expired_date, ip = original_string.rstrip().split(':')
+            return f"{user_name}:{pass_word}:{expired_date}:{user_ip}\n"
+        accounts = [assign_ip_to_user(item) if request.username in item else item for item in accounts]
+        print(f"accounts: {accounts}")
+        with open('account.txt', 'w') as file:
+            file.writelines(accounts)
+        return gr.update(value="Thành công")
+
     def add_quicksettings(self):
         with gr.Row(elem_id="quicksettings", variant="compact"):
             for _i, k, _item in sorted(self.quicksettings_list, key=lambda x: self.quicksettings_names.get(x[1], x[0])):
                 component = create_setting_component(k, is_quicksettings=True)
                 self.component_dict[k] = component
-
+            set_current_ip = gr.Button(value="Dùng máy này để sử dụng SD", elem_id="setting_current_ip")
+            set_current_ip.click(fn=self.set_current_ip_fn, outputs=set_current_ip)
+        
     def add_functionality(self, demo):
-        self.submit.click(
-            fn=wrap_gradio_call(lambda *args: self.run_settings(*args), extra_outputs=[gr.update()]),
-            inputs=self.components,
-            outputs=[self.text_settings, self.result],
-        )
+        # self.submit.click(
+        #     fn=wrap_gradio_call(lambda *args: self.run_settings(*args), extra_outputs=[gr.update()]),
+        #     inputs=self.components,
+        #     outputs=[self.text_settings, self.result],
+        # )
 
         for _i, k, _item in self.quicksettings_list:
             component = self.component_dict[k]

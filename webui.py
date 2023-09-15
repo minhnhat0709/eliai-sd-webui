@@ -1,7 +1,9 @@
 from __future__ import annotations
+import datetime
 
 import os
 import time
+import gradio as gr
 
 from modules import timer
 from modules import initialize_util
@@ -14,6 +16,36 @@ initialize.imports()
 
 initialize.check_versions()
 
+def is_current_date_smaller_than(date_string):
+    # Convert the input date string to a datetime object
+    target_date = datetime.datetime.strptime(date_string, "%Y-%m-%d")
+
+    # Get the current date in the +7 timezone
+    current_date = datetime.datetime.now() + datetime.timedelta(hours=7)
+
+    # Compare the two dates
+    return current_date <= target_date
+
+def login(username, password):
+    is_login_success = False
+    updated_lines = []
+    with open('account.txt', 'r') as f:
+        accounts = f.readlines()
+    for account in accounts:
+        user_name, pass_word, expired_date, ip = account.split(':')
+        print(f"Expired date: %s" % expired_date)
+        if user_name == username and pass_word == password and is_current_date_smaller_than(expired_date.strip()):
+            # logged_account = account + f":{gr.Request.client.host}"
+            # accounts = [logged_account if item == account else item for item in accounts]
+            is_login_success = True
+            break
+
+    # if is_login_success:
+    #     with open(account.txt, 'w') as file:
+    #         file.writelines(accounts)
+
+    return is_login_success
+    
 
 def create_api(app):
     from modules.api.api import Api
@@ -65,7 +97,7 @@ def webui():
         startup_timer.record("create ui")
 
         if not cmd_opts.no_gradio_queue:
-            shared.demo.queue(64)
+            shared.demo.queue(concurrency_count=1)
 
         gradio_auth_creds = list(initialize_util.get_gradio_auth_creds()) or None
 
@@ -84,7 +116,7 @@ def webui():
             ssl_certfile=cmd_opts.tls_certfile,
             ssl_verify=cmd_opts.disable_tls_verify,
             debug=cmd_opts.gradio_debug,
-            auth=gradio_auth_creds,
+            auth=login,
             inbrowser=auto_launch_browser,
             prevent_thread_lock=True,
             allowed_paths=cmd_opts.gradio_allowed_path,
