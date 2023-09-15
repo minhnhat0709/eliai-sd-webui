@@ -97,7 +97,7 @@ def webui():
         startup_timer.record("create ui")
 
         if not cmd_opts.no_gradio_queue:
-            shared.demo.queue(concurrency_count=1)
+            shared.demo.queue(concurrency_count=64)
 
         gradio_auth_creds = list(initialize_util.get_gradio_auth_creds()) or None
 
