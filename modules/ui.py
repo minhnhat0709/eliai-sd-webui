@@ -471,6 +471,8 @@ def create_ui():
                     html_log,
                 ],
                 show_progress=False,
+                # batch=True,
+                # max_batch_size=10,
             )
 
             toprow.prompt.submit(**txt2img_args)
@@ -1251,14 +1253,14 @@ def create_ui():
         (extras_interface, "Extras", "extras"),
         (pnginfo_interface, "PNG Info", "pnginfo"),
         (modelmerger_ui.blocks, "Checkpoint Merger", "modelmerger"),
-        (train_interface, "Train", "train"),
+        # (train_interface, "Train", "train"),
     ]
 
     interfaces += script_callbacks.ui_tabs_callback()
     interfaces += [(settings.interface, "Settings", "settings")]
 
     extensions_interface = ui_extensions.create_ui()
-    interfaces += [(extensions_interface, "Extensions", "extensions")]
+    # interfaces += [(extensions_interface, "Extensions", "extensions")]
 
     shared.tab_names = []
     for _interface, label, _ifid in interfaces:

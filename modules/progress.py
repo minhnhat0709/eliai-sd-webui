@@ -19,7 +19,7 @@ recorded_results_limit = 2
 
 def start_task(id_task):
     global current_task
-
+    
     current_task = id_task
     pending_tasks.pop(id_task, None)
 
